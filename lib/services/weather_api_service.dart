@@ -6,9 +6,12 @@ class WeatherApiService {
   // Constructor that accepts a baseUrl so your providers don't crash
   WeatherApiService({required this.baseUrl});
 
-  /// Bypasses the missing server completely and forces the application
-  /// to instantly load clean local data structures.
-  Future<Map<String, dynamic>> getWeatherForecast(double lat, double lon) async {
+  /// Bypasses the missing server completely by matching the exact method 'getForecast'
+  Future<Map<String, dynamic>> getForecast({
+    required double latitude,
+    required double longitude,
+    required int days,
+  }) async {
     // Delays for 1 second to mimic a realistic server loader ring
     await Future.delayed(const Duration(seconds: 1));
 
