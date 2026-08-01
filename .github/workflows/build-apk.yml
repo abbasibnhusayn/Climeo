@@ -1,0 +1,77 @@
+# Climeo — developed by Halool.
+#
+# Builds a real, installable Android APK entirely in GitHub's cloud —
+# no Flutter/Android Studio needed on your machine. Trigger from the
+# Actions tab, download the artifact when it finishes, install on your
+# phone.
+
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'Backend URL the app should call (e.g. https://your-backend.onrender.com). See DEPLOYMENT.md to get a real one running first.'
+        required: false
+        default: 'http://localhost:8080'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Scaffold Android platform files if missing
+        run: |
+          if [ ! -f android/build.gradle ]; then
+            echo "No android/build.gradle found — generating the Gradle scaffold."
+            flutter create --platforms=android --org app.halool --project-name climeo /tmp/climeo_scaffold
+            mkdir -p android
+            cp -r /tmp/climeo_scaffold/android/. android/
+          else
+            echo "android/build.gradle already present — using the committed scaffold as-is."
+          fi
+
+          git checkout -- \
+            android/app/src/main/AndroidManifest.xml \
+            android/app/src/main/res/xml/climeo_widget_info.xml \
+            android/app/src/main/res/layout/climeo_widget.xml \
+            android/app/src/main/res/drawable/climeo_widget_background.xml \
+            android/app/src/main/res/values/climeo_widget_strings.xml \
+            android/app/src/main/kotlin/app/halool/climeo/ClimeoWidgetProvider.kt
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis (fails the build on real errors)
+        run: flutter analyze --no-fatal-infos
+
+      - name: Generate app icons from the real Climeo logo
+        run: dart run flutter_launcher_icons
+
+      - name: Generate splash screen
+        run: dart run flutter_native_splash:create
+
+      - name: Verify permissions survived icon/splash generation
+        run: |
+          if ! grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml; then
+            echo "::error::Location permission missing from AndroidManifest.xml after icon/splash generation. Failing the build instead of shipping a broken APK."
+            exit 1
+          fi
+
+      - name: Build release APK
+        run: |
+          flutter build apk --release \
+            --dart-define=API_BASE_URL="${{ inputs.api_base_url }}"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: climeo-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
