@@ -2,7 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/location_service.dart';
-import '../services/location_exceptions.dart';
+//import '../services/location_exceptions.dart';
 import 'weather_providers.dart';
 
 enum LocationStatus {
