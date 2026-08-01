@@ -23,7 +23,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: 'any'
           channel: 'stable'
 
       - name: Scaffold Android platform files if missing
