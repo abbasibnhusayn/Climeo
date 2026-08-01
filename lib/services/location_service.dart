@@ -8,20 +8,25 @@
 
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:geolocator/geolocator.dart';
-//import 'location_exceptions.dart';
+
+// Safe inline definitions to avoid duplicate file errors
+class LocationServiceDisabledException implements Exception {}
+class LocationPermissionDeniedException implements Exception {}
+class LocationPermissionDeniedForeverException implements Exception {}
+class LocationUnsupportedPlatformException implements Exception {
+  final String platform;
+  LocationUnsupportedPlatformException(this.platform);
+}
 
 class LocationService {
   /// Resolves the device's current GPS position, walking through the
-  /// full permission lifecycle. Throws one of the typed exceptions in
-  /// location_exceptions.dart on any failure — callers should catch by
-  /// type rather than treating this as an opaque failure, since each
-  /// case needs a different fix shown to the user.
+  /// full permission lifecycle.
   Future<Position> getCurrentLocation() async {
     _assertPlatformSupported();
 
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw const LocationServiceDisabledException();
+      throw LocationServiceDisabledException();
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
@@ -29,12 +34,12 @@ class LocationService {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw const LocationPermissionDeniedException();
+        throw LocationPermissionDeniedException();
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw const LocationPermissionDeniedForeverException();
+      throw LocationPermissionDeniedForeverException();
     }
 
     // permission is now `whileInUse` or `always` — safe to read position.
@@ -57,7 +62,7 @@ class LocationService {
   void _assertPlatformSupported() {
     if (kIsWeb) return; // geolocator has a web implementation
     if (defaultTargetPlatform == TargetPlatform.linux) {
-      throw const LocationUnsupportedPlatformException('Linux');
+      throw LocationUnsupportedPlatformException('Linux');
     }
   }
 }
