@@ -6,7 +6,7 @@ on:
       api_base_url:
         description: 'Backend URL'
         required: false
-        default: 'https://onrender.com' # Safe fallback link to prevent crashing
+        default: 'https://onrender.com'
 
 jobs:
   build:
@@ -18,14 +18,27 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Scaffold Android platform files if missing
+      - name: Force Clean App Infrastructure
         run: |
-          if [ ! -f android/app/build.gradle.kts ]; then
-            flutter create --platforms=android --org app.halool --project-name climeo /tmp/climeo_scaffold
-            mkdir -p android
-            cp -r /tmp/climeo_scaffold/android/. android/
-          fi
-          git checkout -- android/app/src/main/AndroidManifest.xml || true
+          # Back up your code files securely
+          mv lib ../_lib_backup
+          mv pubspec.yaml ../_pubspec_backup
+          
+          # Delete any conflicting background folders completely
+          rm -rf android ios web windows macos linux
+          
+          # Recreate a brand-new pristine app container structure
+          flutter create . --project-name=climeo --org=app.halool --platforms=android
+          
+          # Remove placeholder folders and restore your code files
+          rm -rf lib pubspec.yaml
+          mv ../_lib_backup lib
+          mv ../_pubspec_backup pubspec.yaml
+
+      - name: Disable Ungenerated Asset Plugins
+        run: |
+          # Strip the launcher icon and splash configurations so they do not crash the app launch
+          sed -i '/flutter_launcher_icons:/,$d' pubspec.yaml || true
 
       - name: Overwrite Configuration with Modern Required Patches
         run: |
@@ -36,11 +49,12 @@ jobs:
 
       - name: Inject Location and Internet Permissions
         run: |
-          # This inserts BOTH location and internet hardware permission requests safely
           sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET" />\n<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n<application|' android/app/src/main/AndroidManifest.xml
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          flutter clean
+          flutter pub get
 
       - name: Compile Release APK
         run: |
