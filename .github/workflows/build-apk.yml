@@ -20,24 +20,16 @@ jobs:
 
       - name: Force Clean App Infrastructure
         run: |
-          # Back up your code files securely
           mv lib ../_lib_backup
           mv pubspec.yaml ../_pubspec_backup
-          
-          # Delete any conflicting background folders completely
           rm -rf android ios web windows macos linux
-          
-          # Recreate a brand-new pristine app container structure
           flutter create . --project-name=climeo --org=app.halool --platforms=android
-          
-          # Remove placeholder folders and restore your code files
           rm -rf lib pubspec.yaml
           mv ../_lib_backup lib
           mv ../_pubspec_backup pubspec.yaml
 
       - name: Disable Ungenerated Asset Plugins
         run: |
-          # Strip the launcher icon and splash configurations so they do not crash the app launch
           sed -i '/flutter_launcher_icons:/,$d' pubspec.yaml || true
 
       - name: Overwrite Configuration with Modern Required Patches
@@ -56,14 +48,14 @@ jobs:
           flutter clean
           flutter pub get
 
-      - name: Compile Release APK
+      - name: Compile Uncompressed Debug APK
         run: |
-          flutter build apk --release \
+          flutter build apk --debug \
             --dart-define=API_BASE_URL="${{ inputs.api_base_url }}"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: climeo-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: climeo-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 14
