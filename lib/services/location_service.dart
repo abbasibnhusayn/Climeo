@@ -8,7 +8,7 @@
 
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:geolocator/geolocator.dart';
-import 'location_exceptions.dart';
+//import 'location_exceptions.dart';
 
 class LocationService {
   /// Resolves the device's current GPS position, walking through the
