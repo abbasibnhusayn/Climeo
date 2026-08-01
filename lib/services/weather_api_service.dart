@@ -1,6 +1,11 @@
 import 'dart:async';
 
-class WeatherService {
+class WeatherApiService {
+  final String baseUrl;
+
+  // Constructor that accepts a baseUrl so your providers don't crash
+  WeatherApiService({required this.baseUrl});
+
   /// Bypasses the missing server completely and forces the application
   /// to instantly load clean local data structures.
   Future<Map<String, dynamic>> getWeatherForecast(double lat, double lon) async {
