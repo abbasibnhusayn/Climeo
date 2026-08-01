@@ -191,7 +191,7 @@ class ClimeoTheme {
         ClimeoColors.inkLight,
         ClimeoColors.inkLightSecondary,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: ClimeoColors.surfaceLight,
         elevation: 3,
         shadowColor: ClimeoColors.brandDeepBlue.withOpacity(0.12),
@@ -240,7 +240,7 @@ class ClimeoTheme {
         ClimeoColors.inkDark,
         ClimeoColors.inkDarkSecondary,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: ClimeoColors.surfaceDarkAlt,
         elevation: 3,
         shadowColor: Colors.black.withOpacity(0.4),
