@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Climeo — developed by Halool. -->
+<resources>
+    <string name="widget_description">Current weather at a glance</string>
+</resources>

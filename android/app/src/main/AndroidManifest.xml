@@ -1,0 +1,68 @@
+<!-- Climeo — developed by Halool. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Required for all network calls to the Climeo backend and
+         third-party providers (Open-Meteo, MET Norway, RainViewer tiles). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Location permissions for GPS-based forecasts (Phase "GPS wiring").
+         FINE is requested first for street/neighborhood-level accuracy;
+         COARSE is declared too since geolocator falls back to it if the
+         user only grants approximate location on Android 12+. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Required on Android 13+ (API 33+) to show any notification,
+         including severe weather alert pushes — without this, pushes
+         are delivered but never displayed on those OS versions. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:label="Climeo"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- Home screen widget: renders data written from Dart by
+             lib/services/home_widget_service.dart via the home_widget
+             package. See ClimeoWidgetProvider.kt for the native side. -->
+        <receiver
+            android:name=".ClimeoWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/climeo_widget_info" />
+        </receiver>
+
+        <!-- Required by the home_widget plugin itself to relay widget
+             tap/interaction broadcasts — not something this app's code
+             calls directly. -->
+        <receiver
+            android:name="es.antonborri.home_widget.HomeWidgetBackgroundReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.BACKGROUND" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
